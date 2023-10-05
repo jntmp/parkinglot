@@ -5,6 +5,11 @@ namespace parkinglot;
 class UserInputHandler
 {
 	readonly IParkingController _parkingController;
+	const string CREATE_PARKING_LOT = "create_parking_lot";
+	const string PARK_VEHICLE = "park_vehicle";
+	const string UNPARK_VEHICLE = "unpark_vehicle";
+	const string DISPLAY = "display";
+	const string FREE_COUNT = "free_count";
 
 	public UserInputHandler(IParkingController parkingController)
 	{
@@ -15,29 +20,48 @@ class UserInputHandler
 		bool awaitingUserInput = true;
 
 		while(awaitingUserInput) {
-			string? input = Console.ReadLine();
-			string[]? arr = input?.Split(' ');
-			string? command = arr[0];
-			var validator = new UserInputValidator();
+			string[]? inputArgs = Console.ReadLine()?.Split(' ');
+			
+			string? command = inputArgs.First();
+			string[]? args = inputArgs.Skip(1).ToArray();
 
 			switch(command) {
-				case "create_parking_lot":
-					(string lotId, int floors, int slots) = validator.ValidateCreateParkingLot(arr[1], arr[2], arr[3]);
-					_parkingController.CreateLot(lotId, floors, slots);
+				case CREATE_PARKING_LOT:
+					if (!ArgValidator.ForCreateLot(out CreateParkingLotRequest createParkingLotRequest, args)) {
+						Console.WriteLine("Invalid argument(s)");
+						continue;
+					}
+					_parkingController.CreateLot(createParkingLotRequest);
 					break;
-				case "park_vehicle":
-					(VehicleType vehicleType, string registrationNumber, string color) = validator.ValidateParkVehicle(arr[1], arr[2], arr[3]);
-					Ticket? ticket = _parkingController.Park(vehicleType, registrationNumber, color);
+				case PARK_VEHICLE:
+					if (!ArgValidator.ForParkVehicle(out ParkVehicleRequest parkVehicleRequest, args)) {
+						Console.WriteLine("Invalid argument(s)");
+						continue;
+					}
+					var ticket = _parkingController.ParkVehicle(parkVehicleRequest);
 					if (ticket == null) {
 						Console.WriteLine("Parking Lot Full");
 						break;
 					}
 					Console.WriteLine($"Ticket ID: {ticket.Id}");
 					break;
-				case "unpark_vehicle":
+				case UNPARK_VEHICLE:
+					if (!ArgValidator.ForUnparkVehicle(out string ticketId, args[0])) {
+						Console.WriteLine("Invalid argument(s)");
+						continue;
+					}
+					_parkingController.Unpark(ticketId);
 					break;
-				case "display" when arr[1] == "free_count":
-					Console.WriteLine(_parkingController.GetNumberOfFreeSlots(Int32.Parse(arr[2]), Enum.Parse<VehicleType>(arr[3])));
+				case DISPLAY when args.Length > 0 && args[0] == FREE_COUNT:
+					if (!ArgValidator.ForDisplayFreeSlots(out VehicleTypeEnum vehicleTypeEnum, args[1])) {
+						Console.WriteLine("Invalid argument(s)");
+						continue;
+					}
+					int i = 1;
+					Array.ForEach(_parkingController.GetNumberOfFreeSlots(vehicleTypeEnum), s => {
+						Console.WriteLine($"No. of free slots for {args[1]} slots on Floor {i}: {s}");
+						i++;
+					});
 					break;
 				case "exit":
 					awaitingUserInput = false;

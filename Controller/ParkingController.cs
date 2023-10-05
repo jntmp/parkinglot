@@ -1,38 +1,42 @@
-using System.Collections;
-
 namespace parkinglot;
 
 class ParkingController : IParkingController
 {
-	readonly IFloorRepository _floorRepository;
+	readonly IParkingLotDataContext _parkingLotDataContext;
 
-	public ParkingController(IFloorRepository floorRepository)
+	public ParkingController(IParkingLotDataContext parkingLotDataContext)
 	{
-		_floorRepository = floorRepository;
+		_parkingLotDataContext = parkingLotDataContext;
 	}
 	
-	public void CreateLot(string lotId, int amount, int slotsPerFloor) 
+	public void CreateLot(CreateParkingLotRequest createParkingLotRequest) 
 	{
-		_floorRepository.AddFloors(lotId, amount, slotsPerFloor);
+		_parkingLotDataContext.AddFloors(
+			createParkingLotRequest.LotId, 
+			createParkingLotRequest.NoOfFloors, 
+			createParkingLotRequest.NoOfSlotsPerFloor);
 	}
 
-	public Ticket? Park(VehicleType type, string registrationNumber, string color) 
+	public Ticket? ParkVehicle(ParkVehicleRequest parkVehicleRequest) 
 	{
-		(Floor? floor, Slot? slot) = _floorRepository.FindSlot(type);
-		if (slot == null) {
-			return null;
+		return _parkingLotDataContext.Park(parkVehicleRequest.VehicleType);
+	}
+
+	public void Unpark(string ticketId)
+	{
+		_parkingLotDataContext.Unpark(ticketId);
+	}
+
+	public int[] GetNumberOfFreeSlots(VehicleTypeEnum vehicleTypeEnum) 
+	{
+		List<int> counts = new List<int>();
+		for(int i = 1; i <= _parkingLotDataContext.GetFloorCount(); i++) 
+		{
+			counts.Add(_parkingLotDataContext.GetFreeSlots(i, vehicleTypeEnum)?.Count() ?? 0);
 		}
-		return new Ticket($"{floor?.LotId}_{floor?.Number}_{slot.Number}");
+		return counts.ToArray();
 	}
 
-
-	// static void Unpark(int ticketId) {}
-
-	public int GetNumberOfFreeSlots(int floor, VehicleType type) 
-	{
-		return _floorRepository.GetFreeSlots(floor, type)?.Count() ?? 0;
-	}
-	
 	// static Slot[] GetFreeSlotsPerFloor(VehicleType type) {}
 	// static Slot[] GetOccupiedSlotsPerFloor(VehicleType type) {}
 
@@ -40,7 +44,8 @@ class ParkingController : IParkingController
 
 internal interface IParkingController
 {
-	void CreateLot(string lotId, int amount, int slotsPerFloor);
-	Ticket? Park(VehicleType type, string registrationNumber, string color);
-	int GetNumberOfFreeSlots(int floor, VehicleType type);
+	void CreateLot(CreateParkingLotRequest createParkingLotRequest);
+	Ticket? ParkVehicle(ParkVehicleRequest parkVehicleRequest);
+	void Unpark(string ticketId);
+	int[] GetNumberOfFreeSlots(VehicleTypeEnum vehicleTypeEnum);
 }

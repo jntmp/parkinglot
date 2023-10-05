@@ -1,10 +1,8 @@
 namespace parkinglot;
 
-class Vehicle
+public class ParkVehicleRequest
 {
-	public VehicleType Type {get;set;}
+	public VehicleTypeEnum VehicleType {get;set;}
 	public string RegistrationNumber {get;set;}
 	public string Color {get;set;}
 }
-
-enum VehicleType { Car, Bike, Truck }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = Host.CreateDefaultBuilder();
 
 builder.ConfigureServices(o => {
-	o.AddSingleton<IFloorRepository, FloorRepository>();
+	o.AddSingleton<IParkingLotDataContext, ParkingLotDataContext>();
 	o.AddScoped<IParkingController, ParkingController>();
 	o.AddScoped<UserInputHandler>();
 });
