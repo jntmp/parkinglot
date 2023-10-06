@@ -1,5 +1,3 @@
-using System.Net.Http.Headers;
-
 namespace parkinglot;
 
 class UserInputHandler
@@ -10,6 +8,8 @@ class UserInputHandler
 	const string UNPARK_VEHICLE = "unpark_vehicle";
 	const string DISPLAY = "display";
 	const string FREE_COUNT = "free_count";
+	const string FREE_SLOTS = "free_slots";
+	const string OCCUPIED_SLOTS = "occupied_slots";
 
 	public UserInputHandler(IParkingController parkingController)
 	{
@@ -28,14 +28,15 @@ class UserInputHandler
 			switch(command) {
 				case CREATE_PARKING_LOT:
 					if (!ArgValidator.ForCreateLot(out CreateParkingLotRequest createParkingLotRequest, args)) {
-						Console.WriteLine("Invalid argument(s)");
+						PrintInvalidArguments();
 						continue;
 					}
 					_parkingController.CreateLot(createParkingLotRequest);
 					break;
 				case PARK_VEHICLE:
-					if (!ArgValidator.ForParkVehicle(out ParkVehicleRequest parkVehicleRequest, args)) {
-						Console.WriteLine("Invalid argument(s)");
+					if (!ArgValidator.ForParkVehicle(out ParkVehicleRequest parkVehicleRequest, args))
+					{
+						PrintInvalidArguments();
 						continue;
 					}
 					var ticket = _parkingController.ParkVehicle(parkVehicleRequest);
@@ -47,21 +48,18 @@ class UserInputHandler
 					break;
 				case UNPARK_VEHICLE:
 					if (!ArgValidator.ForUnparkVehicle(out string ticketId, args[0])) {
-						Console.WriteLine("Invalid argument(s)");
+						PrintInvalidArguments();
 						continue;
 					}
 					_parkingController.Unpark(ticketId);
 					break;
-				case DISPLAY when args.Length > 0 && args[0] == FREE_COUNT:
-					if (!ArgValidator.ForDisplayFreeSlots(out VehicleTypeEnum vehicleTypeEnum, args[1])) {
-						Console.WriteLine("Invalid argument(s)");
+				case DISPLAY:
+					if (!ArgValidator.ForDisplayFreeSlots(out VehicleTypeEnum vehicleTypeEnum, args[1]))
+					{
+						PrintInvalidArguments();
 						continue;
 					}
-					int i = 1;
-					Array.ForEach(_parkingController.GetNumberOfFreeSlots(vehicleTypeEnum), s => {
-						Console.WriteLine($"No. of free slots for {args[1]} slots on Floor {i}: {s}");
-						i++;
-					});
+					DisplaySlotStatuses(args, vehicleTypeEnum);
 					break;
 				case "exit":
 					awaitingUserInput = false;
@@ -73,5 +71,35 @@ class UserInputHandler
 		}
 
 		Console.WriteLine($"Program exited");
+	}
+
+	private void DisplaySlotStatuses(string[] args, VehicleTypeEnum vehicleTypeEnum)
+	{
+		switch (args[0])
+		{
+			case FREE_COUNT:
+				int i = 1;
+				_parkingController.GetNumberOfFreeSlots(vehicleTypeEnum).ForEach(s =>
+				{
+					Console.WriteLine($"No. of free slots for {args[1]} slots on Floor {i}: {s}");
+					i++;
+				});
+				break;
+			case FREE_SLOTS:
+			case OCCUPIED_SLOTS:
+				int j = 1;
+				bool occupied = args[0] == OCCUPIED_SLOTS;
+				_parkingController.GetSlots(vehicleTypeEnum, occupied).ForEach(slots =>
+				{
+					Console.WriteLine($"{(occupied ? "Occupied" : "Free")} slots for {vehicleTypeEnum} on Floor {j}: {String.Join(",", slots)}");
+					j++;
+				});
+				break;
+		}
+	}
+
+	private static void PrintInvalidArguments()
+	{
+		Console.WriteLine("Invalid argument(s)");
 	}
 }

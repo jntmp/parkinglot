@@ -27,19 +27,25 @@ class ParkingController : IParkingController
 		_parkingLotDataContext.Unpark(ticketId);
 	}
 
-	public int[] GetNumberOfFreeSlots(VehicleTypeEnum vehicleTypeEnum) 
+	public List<int> GetNumberOfFreeSlots(VehicleTypeEnum vehicleTypeEnum) 
 	{
 		List<int> counts = new List<int>();
 		for(int i = 1; i <= _parkingLotDataContext.GetFloorCount(); i++) 
 		{
-			counts.Add(_parkingLotDataContext.GetFreeSlots(i, vehicleTypeEnum)?.Count() ?? 0);
+			counts.Add(_parkingLotDataContext.GetSlots(i, vehicleTypeEnum)?.Count() ?? 0);
 		}
-		return counts.ToArray();
+		return counts;
 	}
 
-	// static Slot[] GetFreeSlotsPerFloor(VehicleType type) {}
-	// static Slot[] GetOccupiedSlotsPerFloor(VehicleType type) {}
-
+	public List<int[]> GetSlots(VehicleTypeEnum vehicleTypeEnum, bool parked) 
+	{
+		List<int[]> slots = new List<int[]>();
+		for(int i = 1; i <= _parkingLotDataContext.GetFloorCount(); i++) 
+		{
+			slots.Add(_parkingLotDataContext.GetSlots(i, vehicleTypeEnum, parked).Select(s => s.Number).ToArray());
+		}
+		return slots;
+	}
 }
 
 internal interface IParkingController
@@ -47,5 +53,6 @@ internal interface IParkingController
 	void CreateLot(CreateParkingLotRequest createParkingLotRequest);
 	Ticket? ParkVehicle(ParkVehicleRequest parkVehicleRequest);
 	void Unpark(string ticketId);
-	int[] GetNumberOfFreeSlots(VehicleTypeEnum vehicleTypeEnum);
+	List<int> GetNumberOfFreeSlots(VehicleTypeEnum vehicleTypeEnum);
+	List<int[]> GetSlots(VehicleTypeEnum vehicleTypeEnum, bool parked);
 }

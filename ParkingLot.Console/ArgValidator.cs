@@ -42,7 +42,7 @@ class ArgValidator
 
 	public static bool ForUnparkVehicle(out string ticketId, string arg)
 	{
-		if (!string.IsNullOrWhiteSpace(arg)) {
+		if (string.IsNullOrWhiteSpace(arg)) {
 			ticketId = "";
 			return false;
 		}

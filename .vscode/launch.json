@@ -9,7 +9,7 @@
 			"type": "coreclr",
 			"request": "launch",
 			"preLaunchTask": "build",
-			"program": "${workspaceFolder}/bin/Debug/net6.0/parkinglot.dll",
+			"program": "${workspaceFolder}/ParkingLot.Console/bin/Debug/net6.0/parkinglot.dll",
 			"args": [],
 			"cwd": "${workspaceFolder}",
 			"console": "integratedTerminal",

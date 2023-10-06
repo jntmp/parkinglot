@@ -16,4 +16,3 @@ var app = builder.Build();
 var userInputHandler = app.Services.GetRequiredService<UserInputHandler>();
 
 userInputHandler.Init();
-

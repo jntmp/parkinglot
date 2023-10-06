@@ -1,4 +1,3 @@
-
 namespace parkinglot;
 
 class ParkingLotDataContext : IParkingLotDataContext
@@ -48,7 +47,7 @@ class ParkingLotDataContext : IParkingLotDataContext
 
 	public int GetFloorCount() => _floors.Count;
 
-	public IEnumerable<Slot> GetFreeSlots(int floor, VehicleTypeEnum type)
+	public IEnumerable<Slot> GetSlots(int floor, VehicleTypeEnum type, bool parked = true)
 	{
 		return _floors[floor - 1].Slots.Where(s => !s.Parked && s.Type.Equals(type));
 	}
@@ -69,6 +68,6 @@ internal interface IParkingLotDataContext
 	void AddFloors(string lotId, int amount, int slotsPerFloor);
 	Ticket? Park(VehicleTypeEnum vehicleTypeEnum);
 	void Unpark(string ticketId);
-	IEnumerable<Slot> GetFreeSlots(int floor, VehicleTypeEnum vehicleTypeEnum);
+	IEnumerable<Slot> GetSlots(int floor, VehicleTypeEnum vehicleTypeEnum, bool parked = true);
 	int GetFloorCount();
 }
