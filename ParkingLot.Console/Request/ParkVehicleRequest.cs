@@ -1,4 +1,6 @@
-namespace parkinglot;
+using parkinglot.Model;
+
+namespace parkinglot.Request;
 
 public class ParkVehicleRequest
 {

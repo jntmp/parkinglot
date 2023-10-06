@@ -2,6 +2,8 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using parkinglot.Controller;
+using parkinglot.Infrastructure;
 
 var builder = Host.CreateDefaultBuilder();
 

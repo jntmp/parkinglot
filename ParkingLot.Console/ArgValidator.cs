@@ -1,3 +1,6 @@
+using parkinglot.Model;
+using parkinglot.Request;
+
 namespace parkinglot;
 
 class ArgValidator

@@ -1,4 +1,4 @@
-namespace parkinglot;
+namespace parkinglot.Model;
 
 class Ticket
 {

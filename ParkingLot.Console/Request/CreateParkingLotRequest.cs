@@ -1,4 +1,4 @@
-namespace parkinglot;
+namespace parkinglot.Request;
 
 class CreateParkingLotRequest
 {
